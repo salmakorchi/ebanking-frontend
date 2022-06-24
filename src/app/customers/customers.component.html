@@ -1,5 +1,7 @@
 <div class="container mt-2">
+
   <div class="card" *ngIf="customers">
+
     <div class="card-header"></div>
 
     <div class="card-body"></div>
@@ -13,7 +15,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let c of customers">
+      <tr *ngFor="let c of customers | async">
         <td>{{c.id}}</td>
         <td>{{c.name}}</td>
         <td>{{c.email}}</td>
