@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {AccountsService} from "../services/accounts.service";
-import {Observable} from "rxjs";
+import {catchError, Observable, throwError} from "rxjs";
 import {AccountDetails} from "../Model/account.model";
 
 @Component({
@@ -13,6 +13,7 @@ export class AccountsComponent implements OnInit {
   accountFormgroup! : FormGroup;  operationFormGroup! : FormGroup;
   currentPage : number=0;
   pageSize:number=5;
+  errorMessage! :string;
   accountObservable! : Observable<AccountDetails>
   constructor( private fb:FormBuilder,private accountService :AccountsService) { }
 
@@ -33,7 +34,12 @@ export class AccountsComponent implements OnInit {
 
   handleSearchAccount() {
     let accountId : string = this.accountFormgroup.value.accountId;
-    this.accountObservable= this.accountService.getAccount(accountId,this.currentPage,this.pageSize);
+    this.accountObservable= this.accountService.getAccount(accountId,this.currentPage,this.pageSize).pipe(
+      catchError(err => {
+        this.errorMessage=err.error.message;
+        return throwError(err);
+      })
+    );
   }
 
   gotoPage(page : number) {
@@ -50,7 +56,7 @@ export class AccountsComponent implements OnInit {
     if(operationType=='DEBIT'){
       this.accountService.debit(accountId, amount,description).subscribe({
         next : (data)=>{
-          alert("Success Credit");
+          alert("Success debit");
           this.operationFormGroup.reset();
           this.handleSearchAccount();
         },
@@ -61,7 +67,7 @@ export class AccountsComponent implements OnInit {
     } else if(operationType=='CREDIT'){
       this.accountService.credit(accountId, amount,description).subscribe({
         next : (data)=>{
-          alert("Success Debit");
+          alert("Success credit");
           this.operationFormGroup.reset();
           this.handleSearchAccount();
         },
